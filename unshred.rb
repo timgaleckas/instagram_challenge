@@ -110,4 +110,7 @@ class StripeSet
 
 end
 
-Dir.glob('inputs/*.png').each{ |i| StripeSet.new(Image.read(i)[0]).restriped_image.append(false).display }
+Dir.glob('inputs/*shredded.png').each do |i|
+  puts i
+  StripeSet.new(Image.read(i)[0]).restriped_image.append(false).display
+end
