@@ -110,5 +110,4 @@ class StripeSet
 
 end
 
-pics = %w(TokyoPanoramaShredded.png big_sean_shredded.png lenna_shredded.png mona_lisa_shredded.png windowlicker_shredded.png)
-pics.each{ |i| StripeSet.new(Image.read("inputs/#{i}")[0]).restriped_image.append(false).display }
+Dir.glob('inputs/*.png').each{ |i| StripeSet.new(Image.read(i)[0]).restriped_image.append(false).display }
