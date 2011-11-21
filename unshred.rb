@@ -16,7 +16,19 @@ class PixelColumn
 
   def percentage_pixels_that_are_edgelike(other_column)
     @percentage_by_other_column ||= {}
-    @percentage_by_other_column[other_column] ||= (0...pixels.size).select{|index|pixel_is_edgelike?(index, other_column)}.size.to_f / pixels.size
+    @percentage_by_other_column[other_column] = _pptae(other_column)
+  end
+
+  def _pptae(o)
+    count = 0
+    i = 0
+    s = pixels.size
+    s2 = s/100
+    while i < s
+      count+=1 if pixel_is_edgelike?(i, o)
+      i+= s2
+    end
+    count.to_f / s
   end
 
   def pixel_is_edgelike?(index, other_column)
