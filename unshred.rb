@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'narray'
 require 'rmagick'
 include Magick
 
@@ -9,35 +10,33 @@ class PixelColumn
   attr_reader :pixels, :label
 
   def initialize(pixels, label)
-    @pixels, @label = pixels, label
+    @pixels = NArray.to_na(pixels.map{|p|[p.red.to_f,p.green.to_f,p.blue.to_f]})
+    @label = label
   end
-
-  def [](*args); pixels[*args]; end
 
   def percentage_pixels_that_are_edgelike(other_column)
     @percentage_by_other_column ||= {}
     @percentage_by_other_column[other_column] = _pptae(other_column)
   end
 
-  def pixel_is_edgelike?(index, other_column)
-    (self[index+1] && (self[index]-other_column[index]).intensity > (self[index]-self[index+1]).intensity) ||
-    (self[index-1] && (self[index]-other_column[index]).intensity > (self[index]-self[index-1]).intensity)
-  end
-
   private
 
   #original code was: (0...pixels.size).select{|index|pixel_is_edgelike?(index, other_column)}.size.to_f / pixels.size
-  #but this is a ton faster at the cost of skipping some pixels
-  def _pptae(o)
-    count = 0
-    i = 0
-    s = pixels.size
-    s2 = s/100
-    while i < s
-      count+=1 if pixel_is_edgelike?(i, o)
-      i+= s2
-    end
-    count.to_f / s
+  #but this is a ton faster. narray is AMAZING
+  def _pptae(other_column)
+    s = @pixels
+    o = other_column.pixels
+    column_difference = intensity_transform((s[0..2,1..-2] - o[0..2,1..-2]).abs)
+    difference_up     = intensity_transform((s[0..2,1..-2] - s[0..2,0..-3]).abs)
+    difference_down   = intensity_transform((s[0..2,1..-2] - s[0..2,2..-1]).abs)
+    ((column_difference > difference_down).or( column_difference > difference_up )).where.total
+  end
+
+  def intensity_transform(narray)
+    #http://www.imagemagick.org/RMagick/doc/struct.html#Pixel
+    #The intensity is computed as 0.299*R+0.587*G+0.114*B.
+    a = narray * [0.299,0.587,0.114]
+    a[0,true] + a[1,true] + a[2,true]
   end
 end
 
@@ -54,10 +53,6 @@ class Image
 
 end
 
-class Pixel
-  def -( p ); Pixel.new((red - p.red).abs, (green - p.green).abs, (blue - p.blue).abs); end
-end
-
 class StripeSet
 
   class Stripe
@@ -72,10 +67,6 @@ class StripeSet
     def right_index; @right_index ||= ( @index * @size ) + ( @size - 1 );                                     end
     def right_edge;  @right_edge  ||= @stripe_set.image.get_pixel_column( right_index );                      end
     def image;       @image       ||= @stripe_set.image.excerpt(@index*@size,0,@size,@stripe_set.image.rows); end
-
-    def self.edges_match?(left_edge, right_edge)
-      left_edge.percentage_pixels_that_are_edgelike(right_edge)
-    end
 
   end
 
