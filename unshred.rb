@@ -3,8 +3,6 @@ require 'narray'
 require 'rmagick'
 include Magick
 
-MAGIC_NUMBERS = { :outlier_percent     => 0.05 }
-
 class PixelColumn
 
   attr_reader :pixels, :label
@@ -21,8 +19,13 @@ class PixelColumn
 
   private
 
-  #original code was: (0...pixels.size).select{|index|pixel_is_edgelike?(index, other_column)}.size.to_f / pixels.size
-  #but this is a ton faster. narray is AMAZING
+  # given the pixels ( | is the edge we're working with )
+  #
+  #     a |
+  #     b | d
+  #     c |
+  #
+  # we want to know that b is closer (in color) to a or c than it is to d
   def _pptae(other_column)
     s = @pixels
     o = other_column.pixels
@@ -48,8 +51,8 @@ class Image
     @pixel_columns[column_number] ||= PixelColumn.new(get_pixels(column_number, 0, 1, rows ), column_number)
   end
 
-  def each_column_pair(limit=(columns-2))
-    limit = columns-2 if limit > columns-2
+  def each_column_pair(limit=(columns/2))
+    limit = columns/2 if limit > columns/2
     (0...limit).each{|i| yield(get_pixel_column(i), get_pixel_column(i+1))}
   end
 
@@ -93,11 +96,21 @@ class StripeSet
   def stripe_size
     return @stripe_size if @stripe_size
     possible_breaks = []
-    image.each_column_pair(350) do |a,b|
-      possible_breaks << [[a.label,b.label],a.percentage_pixels_that_are_edgelike(b)]
+    image.each_column_pair do |a,b|
+      percentage = a.percentage_pixels_that_are_edgelike(b)
+      possible_breaks[ b.label ] = percentage
     end
-    top_percent_outliers = possible_breaks.sort_by{|a|a[1]}[-(possible_breaks.size*(MAGIC_NUMBERS[:outlier_percent]))..-1]
-    @stripe_size = top_percent_outliers.sort_by{|a|a[0][1]}.map{|a|a[0][1]}.inject([0]){|a,b|a<<(b-a[0]);a[0]=b;a}.select{|a|a>1}.inject({}){|a,b|a[b]||=0;a[b]+=1;a}.sort_by{|a,b|b}.reverse.first.first
+    possible_breaks = NArray.to_na(possible_breaks)
+    possible_breaks = (possible_breaks > (possible_breaks.max - possible_breaks.stddev )).where
+    possible_widths = (possible_breaks[1..-1] - possible_breaks[0..-2])
+    size_to_occurences = possible_widths.to_a.inject({}) do |hash,item|
+      if item > 1
+        hash[item] ||= 0
+        hash[item] += 1
+      end
+      hash
+    end
+    @stripe_size = size_to_occurences.sort_by{|a,b|-b}[0][0]
   end
 
   def ordered_stripes
@@ -122,5 +135,5 @@ end
 Dir.glob('inputs/*shredded.png').each do |i|
   puts i
   image_set = StripeSet.new(Image.read(i)[0]).restriped_image.append(false)
-  image_set.display if false
+  image_set.display
 end
