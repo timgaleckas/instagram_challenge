@@ -19,6 +19,15 @@ class PixelColumn
     @percentage_by_other_column[other_column] = _pptae(other_column)
   end
 
+  def pixel_is_edgelike?(index, other_column)
+    (self[index+1] && (self[index]-other_column[index]).intensity > (self[index]-self[index+1]).intensity) ||
+    (self[index-1] && (self[index]-other_column[index]).intensity > (self[index]-self[index-1]).intensity)
+  end
+
+  private
+
+  #original code was: (0...pixels.size).select{|index|pixel_is_edgelike?(index, other_column)}.size.to_f / pixels.size
+  #but this is a ton faster at the cost of skipping some pixels
   def _pptae(o)
     count = 0
     i = 0
@@ -30,12 +39,6 @@ class PixelColumn
     end
     count.to_f / s
   end
-
-  def pixel_is_edgelike?(index, other_column)
-    (self[index+1] && (self[index]-other_column[index]).intensity > (self[index]-self[index+1]).intensity) ||
-    (self[index-1] && (self[index]-other_column[index]).intensity > (self[index]-self[index-1]).intensity)
-  end
-
 end
 
 class Image
