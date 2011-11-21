@@ -47,8 +47,9 @@ class Image
     @pixel_columns[column_number] ||= PixelColumn.new(get_pixels(column_number, 0, 1, rows ), column_number)
   end
 
-  def each_column_pair
-    (0...(columns-2)).each{|i| yield(get_pixel_column(i), get_pixel_column(i+1))}
+  def each_column_pair(limit=(columns-2))
+    limit = columns-2 if limit > columns-2
+    (0...limit).each{|i| yield(get_pixel_column(i), get_pixel_column(i+1))}
   end
 
 end
@@ -91,7 +92,7 @@ class StripeSet
   def stripe_size
     return @stripe_size if @stripe_size
     possible_breaks = []
-    image.each_column_pair do |a,b|
+    image.each_column_pair(350) do |a,b|
       possible_breaks << [[a.label,b.label],a.percentage_pixels_that_are_edgelike(b)]
     end
     top_percent_outliers = possible_breaks.sort_by{|a|a[1]}[-(possible_breaks.size*(MAGIC_NUMBERS[:outlier_percent]))..-1]
