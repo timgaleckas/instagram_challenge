@@ -16,8 +16,7 @@ class PixelColumn
 
   def percentage_pixels_that_are_edgelike(other_column)
     @percentage_by_other_column ||= {}
-    return @percentage_by_other_column[other_column] if @percentage_by_other_column[other_column]
-    @percentage_by_other_column[other_column] = (0...pixels.size).select{|index|pixel_is_edgelike?(index, other_column)}.size.to_f / pixels.size
+    @percentage_by_other_column[other_column] ||= (0...pixels.size).select{|index|pixel_is_edgelike?(index, other_column)}.size.to_f / pixels.size
   end
 
   def pixel_is_edgelike?(index, other_column)
