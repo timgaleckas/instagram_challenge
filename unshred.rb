@@ -15,7 +15,9 @@ class PixelColumn
   def [](*args); pixels[*args]; end
 
   def percentage_pixels_that_are_edgelike(other_column)
-    (0...pixels.size).select{|index|pixel_is_edgelike?(index, other_column)}.size.to_f / pixels.size
+    @percentage_by_other_column ||= {}
+    return @percentage_by_other_column[other_column] if @percentage_by_other_column[other_column]
+    @percentage_by_other_column[other_column] = (0...pixels.size).select{|index|pixel_is_edgelike?(index, other_column)}.size.to_f / pixels.size
   end
 
   def pixel_is_edgelike?(index, other_column)
@@ -112,5 +114,6 @@ end
 
 Dir.glob('inputs/*shredded.png').each do |i|
   puts i
-  StripeSet.new(Image.read(i)[0]).restriped_image.append(false).display
+  image_set = StripeSet.new(Image.read(i)[0]).restriped_image.append(false)
+  image_set.display if false
 end
