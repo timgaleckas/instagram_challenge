@@ -26,10 +26,11 @@ class PixelColumn
   def _pptae(other_column)
     s = @pixels
     o = other_column.pixels
-    column_difference = intensity_transform((s[0..2,1..-2] - o[0..2,1..-2]).abs)
-    difference_up     = intensity_transform((s[0..2,1..-2] - s[0..2,0..-3]).abs)
-    difference_down   = intensity_transform((s[0..2,1..-2] - s[0..2,2..-1]).abs)
-    ((column_difference > difference_down).or( column_difference > difference_up )).where.total
+    s1 = s[0..2,1..-2]
+    column_difference = intensity_transform((s1 - o[0..2,1..-2]).abs)
+    difference_up     = intensity_transform((s1 - s[0..2,0..-3]).abs)
+    difference_down   = intensity_transform((s1 - s[0..2,2..-1]).abs)
+    ((column_difference > difference_down).or( column_difference > difference_up )).where.total.to_f / s[0,true].total
   end
 
   def intensity_transform(narray)
