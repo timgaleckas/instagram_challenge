@@ -5,37 +5,39 @@ There are some solutions out there already:
 - [Quickly Solving the “Instagram Engineering Challenge: The Unshredder”](http://martin.ankerl.com/2011/11/15/solving-the-instagram-challenge-quickly/) 
 - [Explorations in Go: solving the Instagram engineering challenge](http://blog.carbonfive.com/2011/11/17/explorations-in-go-solving-the-instagram-engineering-challenge/)
 
-And that's just in the first page of Google hits.
+That's just in the first page of Google hits.
 
 Here at [Centro](http://www.centro.net/), the team all challenged each
-other and shared our solutions.
+other and shared our solutions. Here's mine:
+[https://github.com/timgaleckas/instagram_challenge](https://github.com/timgaleckas/instagram_challenge).
 
-I solved the problem and was pretty proud of myself until one of the
-wiseguys here threw this image at my code: [Shredded Mona Lisa](https://github.com/timgaleckas/instagram_challenge/raw/master/inputs/mona_lisa_shredded.png)
+When I solved the problem, I was pretty proud of myself until one of the
+wiseguys here threw this image at my code:
+[Shredded Mona Lisa](https://github.com/timgaleckas/instagram_challenge/raw/master/inputs/mona_lisa_shredded.png).
 
-Of course, [my original code](https://github.com/timgaleckas/instagram_challenge/commit/d186032d71f29bb2568dad00d6e656a6962d0f82) fell over and took 21 seconds to to un-shred an image
+Of course, [my original code](https://github.com/timgaleckas/instagram_challenge/commit/d186032d71f29bb2568dad00d6e656a6962d0f82) fell over. It took 21 seconds to to un-shred an image
 that large. It became a point of pride to see how fast I could get it
 running.
 
 I tried:
 
  - [Caching](https://github.com/timgaleckas/instagram_challenge/commit/180eececcf2f422694554a6244acd489af5c8750)
-for a speed up to 18 seconds.
+    * This cut off 3 seconds for a speed up to 18 seconds.
  - [Unrolling loops and skipping pixels](https://github.com/timgaleckas/instagram_challenge/commit/780931fa6acd5239c66350420a20292cbb039388)
-to get me to 3 seconds but it cost me some resolution and had the
-potential to fail if it checked the wrong pixels (if I started at
-the second pixel instead of the first it failed).
+    * This cut the run time all the way down to 3 seconds.
+    * It, however, cost me some resolution.
+    * It failed if I started at the second pixel instead of the first.
  - [Switching to NArray](https://github.com/timgaleckas/instagram_challenge/commit/66c78aa072a3d33d3fc7805720df1805809c1269)
-gave me comparable speed (5 seconds) without sacrificing any of the
-resolution.
- - And [reducing the scope of the check](https://github.com/timgaleckas/instagram_challenge/commit/18fe2e13df723371cad313c27a7608cb9e9be54b)
-reduced the time back to the blazing fast sub 3 second time without
-sacrificing vertical resolution.
+    * This ran with comparable speed (5 seconds.)
+    * This does not sacrifice any of the resolution.
+ - [Reducing the scope of the check](https://github.com/timgaleckas/instagram_challenge/commit/18fe2e13df723371cad313c27a7608cb9e9be54b)
+    * This reduced the time back to the blazing fast sub 3 second time.
+    * This does not sacrifice any vertical resolution.
 
 If you take a careful look at the code and do the math, you'll see that
 switching to NArray allowed me to go from only checking 100 pixels for
 each column to checking the full 1549 pixels while staying within one
-second of the time of the other run.
+second of the time for the method that picks and chooses pixels to check.
 
 Seems pretty powerful. That's why I'd like to give you a little
 explanation of how we're using NArray in this case and hopefully give
@@ -127,15 +129,20 @@ by:
 And we multiply these pixel arrays by the function to convert to
 intensity:
 
-    a = pixel_differences * [0.299,0.587,0.114]
-    a[0,true] + a[1,true] + a[2,true]
+    def intensity_transform(narray)
+      #http://www.imagemagick.org/RMagick/doc/struct.html#Pixel
+      #The intensity is computed as 0.299*R+0.587*G+0.114*B.
+      a = narray * [0.299,0.587,0.114]
+      a[0,true] + a[1,true] + a[2,true]
+    end
 
-That multiplies each red value by 0.299, each green value by 0.587, each
-blue value by 0.114, and then adds them together to get the intensity.
+This method multiplies each red value by 0.299, each green value by 0.587,
+each blue value by 0.114, and then adds the resultant arrays together to
+find pixel intensity.
 
-So that's all fine and good for values that run horizontally across the
-array, but our formula needs to compare pixels to the top and the bottom
-of the current pixel.
+Adding parallel arrays works naively for values that run horizontally
+across the arrays, but our formula needs to compare pixels to the top and
+the bottom of the current pixel.
 
 Given the pixel map:
 
@@ -148,10 +155,11 @@ Given the pixel map:
     a4 | b4
 
 The formula to check that a2 is closer to the pixel above or below it
-than to the pixel next to it is: ( (a2 - b2) > (a2 - a1) ) || ( (a2 - b2) > (a2 - a3) )
+than to the pixel next to it is:
+( (a2 - b2) > (a2 - a1) ) || ( (a2 - b2) > (a2 - a3) )
 
-To set up the data to allow us to use only operations across rows, we
-add shifted copies of the first array to our dataset like so:
+To set up the data to allow us to use only operations across parallel
+arrays, we add shifted copies of the first array to our dataset like so:
 
     c1 | c2 | c1_u | c1_d
     ---------------------
@@ -170,6 +178,7 @@ The actual NArray code looks like this:
     def _pptae(other_column)
       s = @pixels
       o = other_column.pixels
+      # NArray[ range_for_dimensions, range_for_rows ]
       s1 = s[0..2,1..-2]
       column_difference = intensity_transform((s1 - o[0..2,1..-2]).abs)
       difference_up     = intensity_transform((s1 - s[0..2,0..-3]).abs)
@@ -182,3 +191,11 @@ Notice the 'where' method and the 'total' method.
 'where' returns an array of the indices for which the predicate is
 true and 'total' is the same as the ruby array's size method ( but
 faster )
+
+******
+
+TODO: Closing paragraph
+======
+
+
+******
