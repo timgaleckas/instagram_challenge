@@ -14,7 +14,7 @@ class PixelColumn
 
   def percentage_pixels_that_are_edgelike(other_column)
     @percentage_by_other_column ||= {}
-    @percentage_by_other_column[other_column] = _pptae(other_column)
+    @percentage_by_other_column[other_column] = compute_percentage_pixels_that_are_edgelike(other_column)
   end
 
   private
@@ -26,7 +26,7 @@ class PixelColumn
   #     c |
   #
   # we want to know that b is closer (in color) to a or c than it is to d
-  def _pptae(other_column)
+  def compute_percentage_pixels_that_are_edgelike(other_column)
     s = @pixels
     o = other_column.pixels
     s1 = s[0..2,1..-2]

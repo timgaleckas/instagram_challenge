@@ -175,7 +175,7 @@ So the formula for any given index i, becomes:
 
 The actual NArray code looks like this:
 
-    def _pptae(other_column)
+    def compute_percentage_pixels_that_are_edgelike( other_column )
       s = @pixels
       o = other_column.pixels
       # NArray[ range_for_dimensions, range_for_rows ]
