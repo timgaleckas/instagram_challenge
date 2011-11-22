@@ -146,7 +146,7 @@ the bottom of the current pixel.
 
 Given the pixel map:
 
-| c1 | c2 |
+| C1 | C2 |
 |:--:|:--:|
 | a0 | b0 |
 | a1 | b1 |
@@ -161,17 +161,17 @@ than to the pixel next to it is:
 To set up the data to allow us to use only operations across parallel
 arrays, we add shifted copies of the first array to our dataset like so:
 
-| c1 | c2 | c1_u | c1_d |
-|:--:|:--:|:----:|:----:|
-| a1 | b1 | a2   | a0   |
-| a2 | b2 | a3   | a1   |
-| a3 | b3 | a4   | a2   |
+| C1 | C2 | C1[U] | C1[D] |
+|:--:|:--:|:-----:|:-----:|
+| a1 | b1 | a2    | a0    |
+| a2 | b2 | a3    | a1    |
+| a3 | b3 | a4    | a2    |
 
 ( Notice the removal of the top and bottom row from c1 )
 
 So the formula for any given index i, becomes:
-( ( c1[i] - c2[i] ) > ( c1[i] - c1_u[i] ) ) ||
-( ( c1[i] - c2[i] ) > ( c1[i] - c1_d[i] ) )
+( ( C1[i] - C2[i] ) > ( C1[i] - C1_U[i] ) ) ||
+( ( C1[i] - C2[i] ) > ( C1[i] - C1_D[i] ) )
 
 The actual NArray code looks like this:
 
