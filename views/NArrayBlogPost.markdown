@@ -192,10 +192,14 @@ Notice the 'where' method and the 'total' method.
 true and 'total' is the same as the ruby array's size method ( but
 faster )
 
-******
+Hopefully this has been an enlightening introduction to NArray for some
+of you. It is a pretty cool library that can challenge the way you think
+about a problem and throw some pretty crazy speedup into the mix.
 
-TODO: Closing paragraph
-======
+I'm not saying that NArray is perfect. Far from it. It has bugs (I ran
+into a couple just in this short exercise,) is difficult to use, lacking
+in documentation, and has an api that is far from desired. But what it
+lacks in frills and polish, it far makes up for in pure speed when it
+comes to crunching arrays and matrixes of numbers.
 
-
-******
+I hope it has made it into your ruby toolbox.
