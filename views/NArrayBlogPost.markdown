@@ -15,22 +15,22 @@ When I solved the problem, I was pretty proud of myself until one of the
 wiseguys here threw this image at my code:
 [Shredded Mona Lisa](https://github.com/timgaleckas/instagram_challenge/raw/master/inputs/mona_lisa_shredded.png).
 
-Of course, [my original code](https://github.com/timgaleckas/instagram_challenge/commit/d186032d71f29bb2568dad00d6e656a6962d0f82) fell over. It took 21 seconds to to un-shred an image
+Of course, [my original code](https://github.com/timgaleckas/instagram_challenge/tree/d186032d71f29bb2568dad00d6e656a6962d0f82) fell over. It took 21 seconds to to un-shred an image
 that large. It became a point of pride to see how fast I could get it
 running.
 
 I tried:
 
- - [Caching](https://github.com/timgaleckas/instagram_challenge/commit/180eececcf2f422694554a6244acd489af5c8750)
+ - [Caching](https://github.com/timgaleckas/instagram_challenge/tree/180eececcf2f422694554a6244acd489af5c8750)
     * This cut off 3 seconds for a speed up to 18 seconds.
- - [Unrolling loops and skipping pixels](https://github.com/timgaleckas/instagram_challenge/commit/780931fa6acd5239c66350420a20292cbb039388)
+ - [Unrolling loops and skipping pixels](https://github.com/timgaleckas/instagram_challenge/tree/780931fa6acd5239c66350420a20292cbb039388)
     * This cut the run time all the way down to 3 seconds.
     * It, however, cost me some resolution.
     * It failed if I started at the second pixel instead of the first.
- - [Switching to NArray](https://github.com/timgaleckas/instagram_challenge/commit/66c78aa072a3d33d3fc7805720df1805809c1269)
+ - [Switching to NArray](https://github.com/timgaleckas/instagram_challenge/tree/66c78aa072a3d33d3fc7805720df1805809c1269)
     * This ran with comparable speed (5 seconds.)
     * This does not sacrifice any of the resolution.
- - [Reducing the scope of the check](https://github.com/timgaleckas/instagram_challenge/commit/18fe2e13df723371cad313c27a7608cb9e9be54b)
+ - [Reducing the scope of the check](https://github.com/timgaleckas/instagram_challenge/tree/18fe2e13df723371cad313c27a7608cb9e9be54b)
     * This reduced the time back to the blazing fast sub 3 second time.
     * This does not sacrifice any vertical resolution.
 
